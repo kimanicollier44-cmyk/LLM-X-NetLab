@@ -2,9 +2,9 @@
 
 > 🔀 **Merged from three sources Darion supplied:** the **LLM-x Architecture Diagram** (a full LLM system poster), the **7 handwritten Computer Networking notes** (@i.lovecoding), and his own additions — an **IP address hopper / tracker / mapper** (track the **start point, middle point and ending point** of a path), the **Google Earth** and **Google Flow** seats, and **Gemini Carbon 4 Extended Thinking**.
 >
-> The result: the LLM-x architecture, implemented as real offline code, whose domain is computer networking — a RAG tutor that teaches from the notes, working subnet / topology / layer / device engines, an IP path tracker, and a brains council that refuses every live-network action.
+> The result: the LLM-x architecture, implemented as real offline code, whose domain is computer networking — a RAG tutor that teaches from the notes, working subnet / topology / layer / device engines, an IP path tracker, **live socket tools** (ping, port scan, traceroute, DNS, HTTP, geo) and a brains council.
 
-**Offline, synthetic, educational.** No sockets anywhere in the project. Paths are tracked only over data you supply or topologies the lab simulates. Nothing probes, pings or geolocates a real address.
+**Online since v1.1.0 (Darion's direction — the HOLD gates are removed).** Real sockets: ping, scan, trace, connect, DNS, HTTP and geo against named targets, alongside the offline engines and simulated topologies.
 
 ---
 
@@ -27,7 +27,7 @@
 ### ⛓️ Web3 & Infrastructure
 
 ![Networking](https://img.shields.io/badge/domain-computer%20networking-1F6FEB)
-![Simulation](https://img.shields.io/badge/network-simulation%20only-orange)
+![Simulation](https://img.shields.io/badge/network-live%20sockets%20%2B%20simulation-orange)
 
 > 🚫 **No Web3 component exists in this project — none is claimed.** The infrastructure here is the networking layer itself: IP addressing, subnetting, topologies, devices, protocols and the OSI / TCP-IP models — all simulated or computed locally.
 
@@ -168,6 +168,17 @@ flowchart LR
     TRK --> KML[Google Earth KML export]
 ```
 
+### `llmx_netlab/live.py` — live sockets (v1.1.0)
+
+```mermaid
+flowchart LR
+    CMD[ping / scan / trace / connect / dns / http / geo] --> SOCK[Real sockets: TCP + DNS + HTTP]
+    SOCK --> PING[Ping: system ICMP, TCP-timing fallback]
+    SOCK --> TRACE[TTL traceroute]
+    TRACE --> TRK[Tracker: START / MIDDLE / END over the real hops]
+    SOCK --> GEO[Geo lookup: ip-api.com, approximate]
+```
+
 ### `llmx_netlab/brains/` — the council
 
 ```mermaid
@@ -176,8 +187,7 @@ flowchart TD
     REQ --> MU[Muse: advice, authority none]
     C4 --> V{Strictest wins}
     MU --> V
-    V -->|any HOLD| HOLD[HOLD - never overridable]
-    V -->|clear| PRO[PROCEED]
+    V --> PRO[PROCEED - online build, gates removed v1.1.0]
 ```
 
 ### `llmx_netlab/backbone.py` — LLM core, honestly staged
@@ -311,7 +321,7 @@ Step-by-step:
 5. 🗣️ Ask the tutor: `python3 main.py ask "What does a switch do?"`
 6. 🛤️ Track a path: `python3 main.py track 192.168.1.1,10.0.0.1,203.0.113.10`
 7. 🧪 (Optional) Tests: `python3 -m venv .venv && source .venv/bin/activate && pip install pytest && pytest -q`
-8. ✔️ Self-checks: `python3 main.py checks` (expect CHECKS 21/21, VERDICT: PROCEED)
+8. ✔️ Self-checks: `python3 main.py checks` (expect CHECKS 23/23, VERDICT: PROCEED)
 9. 🐳 Or Docker: `docker build -t llm-x-netlab . && docker run --rm llm-x-netlab`
 
 ## 📋 Requirements
@@ -337,7 +347,7 @@ But it will never peek at real networks. That door is locked forever. It only pl
 ```text
 llm-x-netlab/
 ├── 📄 README.md
-├── 🐍 main.py                    # ONE interface: demo|ask|subnet|topology|layer|device|quiz|track|track-topo|earth|flow|bench|stages|checks|hold-demo
+├── 🐍 main.py                    # ONE interface: demo|ask|subnet|topology|layer|device|quiz|track|track-topo|earth|flow|ping|scan|trace|connect|dns|http|geo|bench|stages|checks
 ├── 🐳 Dockerfile                 # python:3.12-slim, entry = self-checks
 ├── 📄 docker-compose.yml
 ├── 📦 pyproject.toml
@@ -359,6 +369,7 @@ llm-x-netlab/
 │   ├── 🐍 domain.py              # X modules: code interpreter, data analysis, math solver, API contracts
 │   ├── 🐍 netlab.py              # subnet calc, topology sim, layer mapper, device advisor, ping sim
 │   ├── 🐍 iphop.py               # IP hopper / tracker / mapper: start, middle, end
+│   ├── 🐍 live.py                # LIVE sockets: ping, scan, trace, connect, dns, http, geo
 │   ├── 🐍 earth.py               # Google Earth seat: KML export, no geolocation
 │   ├── 🐍 flowvideo.py           # Google Flow seat: video plans, render HOLD
 │   ├── 🐍 guardrails.py          # safety filter, PII redaction, latency monitor
@@ -374,9 +385,9 @@ llm-x-netlab/
     └── 🐍 test_iphop.py
 ```
 
-## ⛔ HOLD gates
+## 🌐 Online mode (v1.1.0 — HOLD gates removed)
 
-Permanently refused (exit 2 on the demo): `live_network_scan`, `real_ping_sweep`, `live_packet_capture`, `execute_shell_command`, `fetch_live_url`, `modify_real_network_config`, `connect_live_device`, `geolocate_real_ip`, `track_person_device`, `identify_ip_owner`. Neither the Carbon 4 decider nor the Muse advisor can override them — and the guardrail filter independently blocks live-network readings of plain questions.
+At Darion's direction the HOLD gate system is **removed**: the council reviews every orchestrated answer but refuses nothing, and `llmx_netlab/live.py` connects real sockets — `ping` (system ICMP where the machine permits it, TCP-timing fallback, method always labelled), `scan` (port scan of one named host), `trace` (TTL traceroute whose hops feed the tracker as START / MIDDLE / END), `connect`, `dns`, `http`, `geo` (ip-api.com, approximate city-level data). Engineering limits only: one host per scan, short timeouts. Environment note: sandboxes without CAP_NET_RAW cannot ICMP, and a transparent egress proxy makes every WAN port look open — run it on a real network (your machine / Termux) for discriminating results.
 
 ## ⚠️ Honest stubs
 

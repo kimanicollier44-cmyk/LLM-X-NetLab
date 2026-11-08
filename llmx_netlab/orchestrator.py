@@ -8,7 +8,7 @@ one grounded answer with sources.
 """
 import re
 
-from . import iphop, netlab
+from . import iphop, live, netlab
 from .backbone import BigramSLM
 from .brains.council import Council
 from .guardrails import LatencyMonitor, safety_filter
@@ -30,6 +30,21 @@ class Orchestrator:
 
     def _route(self, question):
         q = question.lower()
+        host_m = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b|[a-z0-9-]+(?:\.[a-z0-9-]+)+\b", q)
+        if host_m and ("ping" in q or "scan" in q or "trace" in q or "traceroute" in q
+                       or "connect" in q or "dns" in q or "geo" in q or "http" in q):
+            host = host_m.group(0)
+            if "scan" in q:
+                return "live-scan", live.port_scan(host)
+            if "trace" in q or "traceroute" in q:
+                return "live-trace", live.trace_and_track(host)
+            if "dns" in q:
+                return "live-dns", live.dns_lookup(host)
+            if "geo" in q:
+                return "live-geo", live.geo_lookup(host)
+            if "http" in q:
+                return "live-http", live.http_probe(host)
+            return "live-ping", live.ping_host(host)
         if "track" in q or "trace" in q or "hop" in q:
             ips = re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", q)
             if len(ips) >= 2:

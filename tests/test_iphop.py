@@ -1,5 +1,4 @@
 from llmx_netlab import iphop
-from llmx_netlab.brains.carbon4 import HOLD_ACTIONS
 from llmx_netlab.earth import build_kml
 from llmx_netlab.flowvideo import plan_video
 
@@ -44,8 +43,3 @@ def test_flow_plan_is_plan_only():
     plan = plan_video("OSI model")
     assert plan["render"].startswith("HOLD")
     assert plan["total_seconds"] > 0
-
-
-def test_tracking_real_people_is_held():
-    assert "geolocate_real_ip" in HOLD_ACTIONS
-    assert "track_person_device" in HOLD_ACTIONS

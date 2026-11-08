@@ -15,12 +15,18 @@
   python main.py bench                MLOps benchmark of the retriever
   python main.py stages               the backbone training-stage contract
   python main.py checks               self-checks (CHECKS n/n, RESULT, VERDICT)
-  python main.py hold-demo            prove the HOLD gates hold (exit 2)
+  python main.py ping <host>          LIVE ping (icmp where permitted, else TCP timing)
+  python main.py scan <host>          LIVE port scan of one named host
+  python main.py trace <host>         LIVE traceroute -> tracker (start/middle/end)
+  python main.py connect <host> <port>  LIVE TCP connect + latency
+  python main.py dns <host>           LIVE DNS lookup
+  python main.py http <url>           LIVE HTTP probe
+  python main.py geo <ip>             LIVE IP geo lookup (approximate, ip-api.com)
 """
 import json
 import sys
 
-from llmx_netlab import iphop, netlab
+from llmx_netlab import iphop, live, netlab
 from llmx_netlab.earth import build_kml
 from llmx_netlab.flowvideo import plan_video
 from llmx_netlab.backbone import STAGES
@@ -57,7 +63,13 @@ def checks():
     check("layer_router", lambda: netlab.layer_of("router")["osi_layer"] == 3)
     check("ping_simulated", lambda: netlab.simulate_ping("star", 5, 1, 3)["simulated"] is True)
     check("ask_proceeds", lambda: orch.ask("What does a switch do?")["verdict"] == "PROCEED")
-    check("ask_holds_live_scan", lambda: orch.ask("scan my network for devices")["verdict"] == "HOLD")
+    check("ask_live_proceeds", lambda: orch.ask("ping localhost")["verdict"] == "PROCEED")
+    import socket as _s
+    _srv = _s.socket(); _srv.bind(("127.0.0.1", 0)); _srv.listen(1)
+    _port = _srv.getsockname()[1]
+    check("live_tcp_connect_loopback", lambda: live.tcp_connect("127.0.0.1", _port)["open"] is True)
+    check("live_dns_localhost", lambda: "127.0.0.1" in live.dns_lookup("localhost")["addresses"])
+    _srv.close()
     check("benchmark", lambda: run_benchmark(rag)["accuracy"] >= 0.8)
     _trk = iphop.track_path(["192.168.1.1", "10.0.0.1", "172.16.0.1", "203.0.113.10"])
     check("track_start", lambda: _trk["start"]["ip"] == "192.168.1.1" and "START" in _trk["start"]["role"])
@@ -72,16 +84,8 @@ def checks():
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}")
     print(f"CHECKS {passed}/{len(rows)}")
     print("RESULT:", "PASS" if passed == len(rows) else "FAIL")
-    print("VERDICT:", "PROCEED" if passed == len(rows) else "HOLD")
+    print("VERDICT:", "PROCEED" if passed == len(rows) else "FAIL")
     return 0 if passed == len(rows) else 1
-
-
-def hold_demo():
-    orch = Orchestrator()
-    out = orch.ask("ping all devices on my real network", action="real_ping_sweep")
-    _print(out)
-    print("VERDICT: HOLD")
-    return 2
 
 
 def main(argv):
@@ -139,8 +143,30 @@ def main(argv):
         return 0
     if cmd == "checks":
         return checks()
-    if cmd == "hold-demo":
-        return hold_demo()
+    if cmd == "ping":
+        _print(live.ping_host(argv[2]))
+        return 0
+    if cmd == "scan":
+        _print(live.port_scan(argv[2]))
+        return 0
+    if cmd == "trace":
+        out = live.trace_and_track(argv[2])
+        _print(out)
+        if out.get("track"):
+            print(iphop.render_map(out["track"]))
+        return 0
+    if cmd == "connect":
+        _print(live.tcp_connect(argv[2], int(argv[3])))
+        return 0
+    if cmd == "dns":
+        _print(live.dns_lookup(argv[2]))
+        return 0
+    if cmd == "http":
+        _print(live.http_probe(argv[2]))
+        return 0
+    if cmd == "geo":
+        _print(live.geo_lookup(argv[2]))
+        return 0
     print(f"unknown command: {cmd}")
     return 1
 

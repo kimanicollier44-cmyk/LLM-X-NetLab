@@ -21,15 +21,15 @@ def test_orchestrator_answers_from_notes():
     assert "switch" in out["answer"].lower()
 
 
-def test_orchestrator_holds_live_action():
-    out = Orchestrator().ask("ping all devices on my real network", action="real_ping_sweep")
-    assert out["verdict"] == "HOLD"
+def test_orchestrator_live_action_proceeds():
+    out = Orchestrator().ask("ping localhost")
+    assert out["verdict"] == "PROCEED"
 
 
-def test_carbon4_holds_listed_action():
+def test_carbon4_no_hold_gates():
     d = Carbon4().decide("live_network_scan", evidence=[{"title": "x"}])
-    assert d["verdict"] == "HOLD"
-    assert "execute_shell_command" in HOLD_ACTIONS
+    assert d["verdict"] == "PROCEED"
+    assert HOLD_ACTIONS == set()
 
 
 def test_guardrails():

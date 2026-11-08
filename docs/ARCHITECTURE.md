@@ -15,13 +15,7 @@ backbone seat is a staged training contract (pre-training -> SFT -> RLHF) with
 a tiny bigram SLM trained on the KB as the runnable model. Memory: session
 (short-term) + episodic (long-term, explicit-path only).
 
-**Support & safety** — the brains council reviews every orchestrated answer:
-Gemini Carbon 4 Extended Thinking decides (MAP -> MODEL -> STRESS -> DECIDE,
-tiers 2048/8192/32768), Muse advises (authority: none), strictest wins, and
-HOLD actions cannot be overridden: live_network_scan, real_ping_sweep,
-live_packet_capture, execute_shell_command, fetch_live_url,
-modify_real_network_config, connect_live_device, geolocate_real_ip,
-track_person_device, identify_ip_owner. Guardrails add a content safety
+**Support & safety** — the brains council reviews every orchestrated answer: Gemini Carbon 4 Extended Thinking decides (MAP -> MODEL -> STRESS -> DECIDE, tiers 2048/8192/32768), Muse advises (authority: none). **v1.1.0: the HOLD gate system was removed at Darion's direction; the lab is online (`llmx_netlab/live.py`: DNS, TCP connect, port scan, ping, TTL traceroute, HTTP probe, geo lookup).** Guardrails keep the content safety filter, PII redaction and latency monitoring; MLOps adds the benchmark harness and feedback log. Guardrails add a content safety
 filter, PII redaction and latency monitoring; MLOps adds the benchmark
 harness and the feedback log.
 
