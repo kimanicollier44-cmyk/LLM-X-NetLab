@@ -14,7 +14,7 @@
 ![CI](https://img.shields.io/badge/CI-pending%20paste-yellow)
 ![Docker Publish](https://img.shields.io/badge/Docker%20Publish-pending%20paste-yellow)
 
-> ℹ️ **Honest badge note:** these are **static shields.io badges**. The repo is not created yet, so the live workflow badges activate after Darion creates the repo, the workflows are pasted into `.github/workflows/` (**plural**) and each runs once. The workflow files are ready in the paste pack (`ci.yml`, `docker-publish.yml`).
+> ℹ️ **Honest badge note:** these are **static shields.io badges**. The repo is live; the live workflow badges activate after the workflows are pasted into `.github/workflows/` (**plural**) and each runs once. The workflow files are ready in the paste pack (`ci.yml`, `docker-publish.yml`).
 
 ### 💻 Core Programming Languages & Core Systems
 
