@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.1 — 2026-11-08 (docs: raw-socket host note)
+- docs/ARCHITECTURE.md: new "Raw sockets & host requirements" section.
+  CAP_NET_RAW is a host launch-time grant (bounding set / seccomp /
+  ping_group_range) and cannot be created from inside a VM — verified by
+  trying sysctl, setcap and capsh in the build sandbox, where the host
+  drops CAP_NET_RAW from the bounding set. Also records the sandbox's
+  transparent egress interceptor (WAN scans show every TCP port open;
+  loopback scans discriminate) and the direct-network first step:
+  `python main.py scan <your router IP>`.
+
 ## 1.1.0 — 2026-11-08 (Darion's direction: online, hold gates removed)
 - HOLD gate system REMOVED; the council reviews but refuses nothing.
 - NEW llmx_netlab/live.py — real sockets: DNS lookup, TCP connect + latency,

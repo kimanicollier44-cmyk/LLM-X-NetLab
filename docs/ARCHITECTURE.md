@@ -22,6 +22,39 @@ harness and the feedback log.
 **Data flow (ask):** question -> safety filter -> route -> tool/RAG evidence ->
 council review -> grounded answer with sources -> session memory.
 
-**Invariants:** offline only (no sockets anywhere); samples/data are supplied
-or simulated; every tracking view is start/middle/end over supplied or
-simulated paths; KML export never invents coordinates.
+**Invariants:** samples/data are supplied or simulated except the v1.1.0
+live seat (`llmx_netlab/live.py`), which opens real sockets only against a
+named host; every tracking view is start/middle/end; KML export never
+invents coordinates.
+
+## Raw sockets & host requirements
+
+Real ICMP (ping / TTL traceroute) needs `CAP_NET_RAW`, and that permission
+is granted by the **host at launch time** — it cannot be created from
+inside a running VM or container.
+
+Verified 2026-11-08 in the build sandbox (Darion asked for the permission
+to be created; every in-VM route was tried):
+
+- The host runtime drops `CAP_NET_RAW` (also `CAP_NET_ADMIN`,
+  `CAP_SYS_PTRACE`) from the capability bounding set
+  (CapBnd `000001fffff7cfff`), seccomp filtering is on, `NoNewPrivs=1`,
+  and `/proc/sys` is mounted read-only with
+  `net.ipv4.ping_group_range = 65534 65534`.
+- `sysctl -w` → permission denied, value unchanged. `setcap
+  cap_net_raw+ep` on the ping / python3 binaries → exec fails with
+  "Operation not permitted" (setcaps removed after the test). `capsh`
+  raise → "Unable to set capabilities". Raw ICMP socket → `EPERM`;
+  ping (DGRAM) socket → `EACCES`.
+- Fix, host-side only: launch with the capability in the bounding set
+  (e.g. `docker run --cap-add=NET_RAW ...`), a seccomp profile that
+  allows the socket syscalls, and a `ping_group_range` that includes the
+  caller's group (e.g. `0 2147483647`).
+- In that sandbox, egress also passes through a transparent interceptor
+  that accepts every TCP connect: a WAN scan of 1.1.1.1 reported ports
+  54321 / 18765 / 9999 all open (~3 ms each, proxy env unset). Loopback
+  scans discriminate correctly (a test listener on 18765 was found;
+  9999 / 54321 stayed closed), and `ping_host` labels its fallback
+  honestly: `tcp timing (icmp unavailable here)`.
+- On a direct network (a normal host, Termux, a LAN) sockets are real:
+  start with `python main.py scan <your router IP>`.
