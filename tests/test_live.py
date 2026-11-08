@@ -34,10 +34,17 @@ def test_dns_localhost():
     assert "127.0.0.1" in out["addresses"]
 
 
-def test_ping_fallback_reachable(tcp_server):
+def test_ping_loopback_reachable(tcp_server):
+    # ping_host labels its method honestly: "icmp (system ping)" where the
+    # machine permits ping (e.g. GitHub-hosted runners), "tcp timing ..."
+    # where ICMP is blocked (e.g. a sandbox with no CAP_NET_RAW). Either
+    # way a loopback host with a live listener must read as reachable.
     out = live.ping_host("127.0.0.1", fallback_ports=(tcp_server,))
-    assert out["method"].startswith("tcp timing")
-    assert out["reachable"] is True
+    if out["method"].startswith("icmp"):
+        assert out["replies"] >= 1
+    else:
+        assert out["method"].startswith("tcp timing")
+        assert out["reachable"] is True
 
 
 def test_http_probe_local():
