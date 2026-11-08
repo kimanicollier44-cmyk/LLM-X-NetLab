@@ -1,0 +1,4 @@
+services:
+  llm-x-netlab:
+    build: .
+    image: credkellar/llm-x-netlab:latest

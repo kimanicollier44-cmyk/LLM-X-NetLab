@@ -1,0 +1,9 @@
+[project]
+name = "llm-x-netlab"
+version = "1.0.0"
+description = "LLM-x architecture merged with a computer-networking lab: RAG tutor, subnet/topology engines, offline only"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
