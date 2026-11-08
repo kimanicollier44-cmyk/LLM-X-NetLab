@@ -189,6 +189,89 @@ flowchart LR
     PT --> SLM[Tiny bigram SLM: generates from KB words]
 ```
 
+### `llmx_netlab/kb.py` — the knowledge base
+
+```mermaid
+flowchart LR
+    N[7 handwritten notes pages] --> KB[21 structured entries: title / body / tags]
+    KB --> RAG[Feeds the RAG corpus]
+    KB --> SLM[Trains the bigram SLM]
+    KB --> TUT[Tutor study cards]
+```
+
+### `llmx_netlab/gateway.py` — multi-modal gateway & input processing
+
+```mermaid
+flowchart LR
+    IN[Text input] --> TOK[Tokenizer]
+    TOK --> VOC[Vocabulary over the KB corpus]
+    IN2[Image / audio bytes] --> FP[Fingerprint only: sha256 + size, never decoded]
+```
+
+### `llmx_netlab/embeddings.py` — embedding models
+
+```mermaid
+flowchart LR
+    DOC[Documents] --> TF[Term frequency]
+    TF --> IDF[Inverse document frequency]
+    IDF --> VEC[TF-IDF vectors]
+    Q[Query vector] --> COS[Cosine similarity]
+    VEC --> COS
+```
+
+### `llmx_netlab/memory.py` — memory systems
+
+```mermaid
+flowchart LR
+    TURN[Conversation turn] --> SES[Session memory: short-term, in RAM, last 20]
+    TURN --> EPI[Episodic memory: long-term JSON, only at an explicit path]
+```
+
+### `llmx_netlab/domain.py` — domain-specific 'X' modules
+
+```mermaid
+flowchart TD
+    X[Domain X] --> CI[Code interpreter: safe AST arithmetic, no eval]
+    X --> DA[Data analysis: transfer-time over a link]
+    X --> MS[Math solver: bandwidth unit conversion]
+    X --> API[External API integrations: contracts by name, never called]
+```
+
+### `llmx_netlab/earth.py` — Google Earth seat
+
+```mermaid
+flowchart LR
+    TRK[Tracked path] --> C{Caller supplied coordinates?}
+    C -->|yes, their own points| KML[KML: START / MIDDLE / END placemarks + path line]
+    C -->|no| NOTE[KML with a no-coordinates note - nothing invented]
+```
+
+### `llmx_netlab/flowvideo.py` — Google Flow seat
+
+```mermaid
+flowchart LR
+    TOPIC[Notes topic] --> G[Ground in the KB entry]
+    G --> SB[Storyboard: setup / explain / diagram / recap]
+    SB --> HOLD[Render: HOLD - needs Darions own Flow access]
+```
+
+### `llmx_netlab/guardrails.py` — guardrails & monitoring
+
+```mermaid
+flowchart LR
+    REQ[Request / answer] --> SF[Content safety filter]
+    REQ --> PII[PII redaction for logs]
+    CALL[Any timed call] --> LAT[Latency monitor: samples + summary]
+```
+
+### `llmx_netlab/mlops.py` — MLOps & continuous learning
+
+```mermaid
+flowchart LR
+    BENCH[Fixed 10-question benchmark] --> GRADE[Grade retriever top-1 vs expected entry]
+    GRADE --> ACC[Accuracy report]
+    VOTE[Helpful? votes] --> LOG[Feedback log - human promotes to KB, never automatic]
+```
 ---
 
 ## 🤩 Why is this cool?
