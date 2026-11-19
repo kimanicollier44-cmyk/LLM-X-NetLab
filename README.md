@@ -1,3 +1,5 @@
+![LLM-X-NetLab Cover](assets/cover.png)
+
 # 🧠🌐 LLM-X-NetLab
 
 > 🔀 **Merged from three sources Darion supplied:** the **LLM-x Architecture Diagram** (a full LLM system poster), the **7 handwritten Computer Networking notes** (@i.lovecoding), and his own additions — an **IP address hopper / tracker / mapper** (track the **start point, middle point and ending point** of a path), the **Google Earth** and **Google Flow** seats, and **Gemini Carbon 4 Extended Thinking**.
